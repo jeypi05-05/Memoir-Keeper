@@ -1,0 +1,58 @@
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+    <script>
+
+  // Automatically read URL parameters when the page loads
+      window.addEventListener('DOMContentLoaded', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const clientId = urlParams.get('id'); // e.g., ?id=client-smith
+
+        if (!clientId) {
+          alert("No client ID provided!");
+          return;
+        }
+
+        // Dynamically set the .mind target file and video source based on the ID folder
+        const scene = document.querySelector('a-scene');
+        scene.setAttribute('mindar-image', `imageTargetSrc: https://yourdomain.com/clients/${clientId}/target.mind;`);
+
+        const video = document.querySelector('#dynamicVideo');
+        video.src = `https://yourdomain.com/clients/${clientId}/video.mp4`;
+      });
+
+
+      // Component to handle playing/pausing the video based on image tracking
+      AFRAME.registerComponent('ar-video-handler', {
+        init: function () {
+          const target = this.el;
+          const video = document.querySelector("#myVideo");
+
+          target.addEventListener("targetFound", event => {
+            video.play();
+          });
+
+          target.addEventListener("targetLost", event => {
+            video.pause();
+          });
+        }
+      });
+    </script>
+  </head>
+
+  <body>
+    <a-scene color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
+      <a-assets>
+        <video id="dynamicVideo" crossorigin="anonymous" loop></video>
+      </a-assets>
+
+      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+      <a-entity mindar-image-target="targetIndex: 0" ar-video-handler>
+        <a-video src="#dynamicVideo" position="0 0 0" width="1" height="0.56"></a-video>
+      </a-entity>
+    </a-scene>
+  </body>
+</html>
