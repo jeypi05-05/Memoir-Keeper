@@ -4,54 +4,51 @@
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
     <script>
-
-  // Automatically read URL parameters when the page loads
       window.addEventListener('DOMContentLoaded', () => {
         const urlParams = new URLSearchParams(window.location.search);
-        const clientId = urlParams.get('id'); // e.g., ?id=client-smith
-
+        const clientId = urlParams.get('id'); 
         if (!clientId) {
-          alert("No client ID provided!");
+          alert("Error: No client ID found in the link.");
           return;
         }
 
-        // Dynamically set the .mind target file and video source based on the ID folder
+       
         const scene = document.querySelector('a-scene');
-        scene.setAttribute('mindar-image', `imageTargetSrc: https://yourdomain.com/clients/${clientId}/target.mind;`);
+        scene.setAttribute('mindar-image', `imageTargetSrc: clients/${clientId}/target.mind;`);
 
-        const video = document.querySelector('#dynamicVideo');
-        video.src = `https://yourdomain.com/clients/${clientId}/video.mp4`;
+      
+        document.querySelector('#video1').src = `clients/${clientId}/video1.mp4`;
+        document.querySelector('#video2').src = `clients/${clientId}/video2.mp4`;
       });
 
-
-      // Component to handle playing/pausing the video based on image tracking
+ 
       AFRAME.registerComponent('ar-video-handler', {
         init: function () {
           const target = this.el;
-          const video = document.querySelector("#myVideo");
-
-          target.addEventListener("targetFound", event => {
-            video.play();
-          });
-
-          target.addEventListener("targetLost", event => {
-            video.pause();
-          });
+          const video = document.querySelector("#" + this.data.videoID);
+          target.addEventListener("targetFound", () => video.play());
+          target.addEventListener("targetLost", () => video.pause());
         }
       });
     </script>
   </head>
-
   <body>
     <a-scene color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
       <a-assets>
-        <video id="dynamicVideo" crossorigin="anonymous" loop></video>
+        <video id="video1" crossorigin="anonymous" loop></video>
+        <video id="video2" crossorigin="anonymous" loop></video>
       </a-assets>
 
       <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-      <a-entity mindar-image-target="targetIndex: 0" ar-video-handler>
-        <a-video src="#dynamicVideo" position="0 0 0" width="1" height="0.56"></a-video>
+      <!-- Target Index 0 plays video1 when scanned -->
+      <a-entity mindar-image-target="targetIndex: 0" ar-video-handler="videoID: video1">
+        <a-video src="#video1" position="0 0 0" width="1" height="0.56"></a-video>
+      </a-entity>
+
+      <!-- Target Index 1 plays video2 when scanned -->
+      <a-entity mindar-image-target="targetIndex: 1" ar-video-handler="videoID: video2">
+        <a-video src="#video2" position="0 0 0" width="1" height="0.56"></a-video>
       </a-entity>
     </a-scene>
   </body>
